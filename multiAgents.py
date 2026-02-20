@@ -68,14 +68,38 @@ class ReflexAgent(Agent):
         to create a masterful evaluation function.
         """
         # Useful information you can extract from a GameState (pacman.py)
+        # Main take away is for each new position calculate a fxn which rewards or doesn't reward an action,
+        #have it pick the max action based on the eval function
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         newPos = successorGameState.getPacmanPosition()
         newFood = successorGameState.getFood()
+        newFoodGrid = newFood.asList()
+        # manhattanDistance(new)
         newGhostStates = successorGameState.getGhostStates()
+        # min distance to ghost
+        minGhostDistance = []
+        for i in newGhostStates:
+            minGhostDistance.append([manhattanDistance(newPos, i.getPosition()), i.getPosition()])
+        
+        minFoodCoordiante = []
+        
+        for i in newFoodGrid:
+            minFoodCoordiante.append([ manhattanDistance(newPos, i), i])
+
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+        if len(minFoodCoordiante) == 0:
+            return successorGameState.getScore()
+        minimum = min(minFoodCoordiante)
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+       
+        if len(minGhostDistance) == 0:
+            return successorGameState.getScore() -  manhattanDistance(newPos, minimum[1])
+        minimumGhost = min(minGhostDistance)
+
+        if minimumGhost[0] <= 2:
+            return -100
+        return successorGameState.getScore() -  manhattanDistance(newPos, minimum[1]) + manhattanDistance(newPos, minimumGhost[1])
 
 def scoreEvaluationFunction(currentGameState: GameState):
     """
