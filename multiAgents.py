@@ -254,7 +254,91 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        totalNumOfAgents = gameState.getNumAgents()
+        actionToReturn = None
+        num = float('-inf')
+        
+
+        # for theAction in gameState.getLegalActions(0):
+        #     succssor = gameState.generateSuccessor(0, theAction)
+
+        #     val = value(succssor, 0, 1)
+        #     if val > num or actionToReturn is None:
+        #         actionToReturn = theAction
+        #         num = val
+        def value(state, depth, numOfAgent, alpha, beta):
+            
+            # listOfActions = gameState.getLegalActions(gameState)
+            # allSuccessors = []
+            # for action in listOfActions:
+            #     allSuccessors.append(gameState.generateSuccessor(gameState, action))
+
+            if state.isWin() == True or state.isLose() == True or self.depth == depth:
+                return self.evaluationFunction(state)
+            if numOfAgent == 0:
+                return maxValueOfState(state, depth, alpha, beta)
+            elif numOfAgent > 0:
+                return minValueOfState(state, depth, numOfAgent, alpha, beta)
+            
+            
+        #write down maxState
+        def maxValueOfState(state, depth, alpha, beta):
+            listOfActions = state.getLegalActions(0)
+            num = float('-inf')
+
+            #so we don't get any index errors
+            if not listOfActions:
+                return self.evaluationFunction(state)
+            for theAction in listOfActions:
+                #not evaluating actions, we are evaluating states
+                # num = max(num, minValueOfState(succ))
+                succ = state.generateSuccessor(0,theAction)
+                # need to pass in value, as this is what will allow us to make a list of all 
+                # min values for us to choose from at the maxLevel
+                num = max(num, value(succ, depth, 1, alpha, beta))
+                if num > beta:
+                    return num
+                alpha = max(alpha, num)
+            return num
+        #write down minState
+        def minValueOfState(state, depth, numOfAgent, alpha, beta):
+            num =  float('inf')
+            listOfActions = state.getLegalActions(numOfAgent)
+            if not listOfActions:
+                return self.evaluationFunction(state)
+            lastAgent = totalNumOfAgents - 1
+            # for succ in allSuccessors:
+
+            #     num = min(num, maxValueOfState(succ))
+
+            for action in listOfActions:
+                successor = state.generateSuccessor(numOfAgent, action)
+
+                if numOfAgent == lastAgent:
+                    #send it back to pacman if we are on last agent
+                    num = min(num, value(successor, depth + 1, 0, alpha, beta))
+                    if num < alpha:
+                        return num
+                    beta = min(beta, num)
+                else:
+
+                    num = min(num, value(successor, depth, numOfAgent + 1, alpha, beta))
+                    if num < alpha:
+                        return num
+                    beta = min(beta, num)
+            return num
+        alpha = float('-inf')
+        beta= float('inf')
+        for theAction in gameState.getLegalActions(0):
+            succssor = gameState.generateSuccessor(0, theAction)
+
+            val = value(succssor, 0, 1, alpha, beta)
+            if val > num or actionToReturn is None:
+                actionToReturn = theAction
+                num = val
+            alpha = max(num,alpha )
+        return actionToReturn
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
