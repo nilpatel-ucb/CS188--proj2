@@ -432,7 +432,39 @@ def betterEvaluationFunction(currentGameState: GameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # successorGameState = currentGameState.generatePacmanSuccessor(action)
+    newPos = currentGameState.getPacmanPosition()
+    newFood = currentGameState.getFood()
+    newFoodGrid = newFood.asList()
+    
+    score = 0
+        # manhattanDistance(new)
+    newGhostStates = currentGameState.getGhostStates()
+    
+        # min distance to ghost
+    # should evalulate states rather than actions unlike reflex sshtuff
+
+    #do smthn w food and prioritize food
+    amountOfFood = len(newFoodGrid)
+
+    #proximity of ghost make the score smaller
+    distanceFromGhost = []
+    for aGhost in newGhostStates:
+        distace = manhattanDistance(newPos, aGhost.getPosition())
+        distanceFromGhost.append(distace)
+    score += 4 * min(distanceFromGhost)
+    #push to prioritize food
+    score += -2 * amountOfFood
+
+    if amountOfFood > 0:
+        for f in newFoodGrid:
+            minDistance = (manhattanDistance(newPos, f))
+            score += 5.0/(minDistance + 1.0)
+
+    #if ghost is scared then have it do the opposite of ghost coming closer
+
+    return score
+
 
 # Abbreviation
 better = betterEvaluationFunction
