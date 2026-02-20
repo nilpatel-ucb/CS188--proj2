@@ -70,6 +70,8 @@ class ReflexAgent(Agent):
         # Useful information you can extract from a GameState (pacman.py)
         # Main take away is for each new position calculate a fxn which rewards or doesn't reward an action,
         #have it pick the max action based on the eval function
+
+        # evalulates actions rather than state
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         newPos = successorGameState.getPacmanPosition()
         newFood = successorGameState.getFood()
@@ -160,7 +162,87 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        # how do we keep track of depth?
+        # how does recursssion work
+
+        totalNumOfAgents = gameState.getNumAgents()
+        actionToReturn = None
+        num = float('-inf')
+
+        # for theAction in gameState.getLegalActions(0):
+        #     succssor = gameState.generateSuccessor(0, theAction)
+
+        #     val = value(succssor, 0, 1)
+        #     if val > num or actionToReturn is None:
+        #         actionToReturn = theAction
+        #         num = val
+        def value(state, depth, numOfAgent):
+            
+            # listOfActions = gameState.getLegalActions(gameState)
+            # allSuccessors = []
+            # for action in listOfActions:
+            #     allSuccessors.append(gameState.generateSuccessor(gameState, action))
+
+            if state.isWin() == True or state.isLose() == True or self.depth == depth:
+                return self.evaluationFunction(state)
+            if numOfAgent == 0:
+                return maxValueOfState(state, depth)
+            elif numOfAgent > 0:
+                return minValueOfState(state, depth, numOfAgent)
+            
+            
+        #write down maxState
+        def maxValueOfState(state, depth):
+            listOfActions = state.getLegalActions(0)
+            num = float('-inf')
+
+            #so we don't get any index errors
+            if not listOfActions:
+                return self.evaluationFunction(state)
+            for theAction in listOfActions:
+                #not evaluating actions, we are evaluating states
+                # num = max(num, minValueOfState(succ))
+                succ = state.generateSuccessor(0,theAction)
+                # need to pass in value, as this is what will allow us to make a list of all 
+                # min values for us to choose from at the maxLevel
+                num = max(num, value(succ, depth, 1))
+            return num
+        #write down minState
+        def minValueOfState(state, depth, numOfAgent):
+            num =  float('inf')
+            listOfActions = state.getLegalActions(numOfAgent)
+            if not listOfActions:
+                return self.evaluationFunction(state)
+            lastAgent = totalNumOfAgents - 1
+            # for succ in allSuccessors:
+
+            #     num = min(num, maxValueOfState(succ))
+
+            for action in listOfActions:
+                successor = state.generateSuccessor(numOfAgent, action)
+
+                if numOfAgent == lastAgent:
+                    #send it back to pacman if we are on last agent
+                    num = min(num, value(successor, depth + 1, 0))
+                else:
+                    num = min(num, value(successor, depth, numOfAgent + 1))
+            return num
+        
+        for theAction in gameState.getLegalActions(0):
+            succssor = gameState.generateSuccessor(0, theAction)
+
+            val = value(succssor, 0, 1)
+            if val > num or actionToReturn is None:
+                actionToReturn = theAction
+                num = val
+        return actionToReturn
+
+
+
+
+
+        
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
